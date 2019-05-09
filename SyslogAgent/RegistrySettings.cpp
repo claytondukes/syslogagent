@@ -15,7 +15,7 @@ extern "C" {
 *initEventLogTypeEntry  -  Register the different event log types (security, DNS server...) and thereby activate SyslogAgents handling of them...
 ********************************************************************************/
 
-void initEventLogTypeEntry(HKEY hKey,char *Name,int facility) {
+void initEventLogTypeEntry(HKEY hKey,wchar_t *Name,int facility) {
 
 	HKEY 		hKeySection;
 	DWORD		dwSize, dwValue;
@@ -114,14 +114,14 @@ void __cdecl initRegistry(char *SyslogAddress) {
 
 
 	// Connect to the registry on HKLM
-	if (RegConnectRegistry( (char*)((LPCTSTR)""), HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS){
-		DEBUGSERVICE(Message,"Failed to open HKEY_LOCAL_MACHINE in registry - settings not read");
+	if (RegConnectRegistry( L"", HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS){
+		DEBUGSERVICE(4,"Failed to open HKEY_LOCAL_MACHINE in registry - settings not read");
 		return;
 	}
 	// Create the SOFTWARE\Datagram key or open it if it exists
 	if (RegCreateKeyEx( hKeyRemote, NTSYSLOG_SOFTWARE_KEY, 0, REG_NONE, REG_OPTION_NON_VOLATILE,
 						KEY_WRITE|KEY_READ|WRITE_DAC, NULL, &hKeySoftware, &dwValue) != ERROR_SUCCESS){
-		DEBUGSERVICE(Message,"Failed to open or create SyslogAgent key in registry - settings not read");
+		DEBUGSERVICE(4,"Failed to open or create SyslogAgent key in registry - settings not read");
 		RegCloseKey( hKeyRemote);
 		return;
 	}
@@ -130,7 +130,7 @@ void __cdecl initRegistry(char *SyslogAddress) {
 		// Write the primary syslogd server
 		dwSize = strlen(SyslogAddress);
 		if (RegSetValueEx( hKeySoftware, PRIMARY_SYSLOGD_ENTRY, 0, REG_SZ, (LPBYTE ) (LPCTSTR)( SyslogAddress), dwSize) != ERROR_SUCCESS){
-			DEBUGSERVICE(Message,"Failed to write SyslogIPAdress key to registry.");
+			DEBUGSERVICE(4,"Failed to write SyslogIPAdress key to registry.");
 			RegCloseKey (hKeySoftware);
 			RegCloseKey( hKeyRemote);
 			return;
@@ -202,59 +202,59 @@ void __cdecl initRegistry(char *SyslogAddress) {
 		}
 	}
 
-	DEBUGSERVICE(Message,"Registry init phase 1 done.");
+	DEBUGSERVICE(4,"Registry init phase 1 done.");
 
 	if (RegOpenKeyEx(hKeySoftware,APPLICATION_SECTION,0,KEY_WRITE|KEY_READ|WRITE_DAC,&hRegTest)!= ERROR_SUCCESS) {
 		initEventLogTypeEntry(hKeySoftware,APPLICATION_SECTION, FACILITY_LOCAL7);
-		regPermSet.Format("%s\\%s",NTSYSLOG_SOFTWARE_KEY,APPLICATION_SECTION);
+		regPermSet.Format(L"%s\\%s",NTSYSLOG_SOFTWARE_KEY,APPLICATION_SECTION);
 		AddPermissions(regPermSet);
 	} else
 		RegCloseKey(hRegTest);
 
 	if (RegOpenKeyEx(hKeySoftware,SECURITY_SECTION,0,KEY_WRITE|KEY_READ|WRITE_DAC,&hRegTest)!= ERROR_SUCCESS) {
 		initEventLogTypeEntry(hKeySoftware,SECURITY_SECTION, FACILITY_SECURITYAUTH);
-		regPermSet.Format("HKEY_LOCAL_MACHINE\\%s\\%s",NTSYSLOG_SOFTWARE_KEY,SECURITY_SECTION);
+		regPermSet.Format(L"HKEY_LOCAL_MACHINE\\%s\\%s",NTSYSLOG_SOFTWARE_KEY,SECURITY_SECTION);
 		AddPermissions(regPermSet);
 	} else
 		RegCloseKey(hRegTest);
 	
 	if (RegOpenKeyEx(hKeySoftware,SYSTEM_SECTION,0,KEY_WRITE|KEY_READ|WRITE_DAC,&hRegTest)!= ERROR_SUCCESS) {
 		initEventLogTypeEntry(hKeySoftware,SYSTEM_SECTION, FACILITY_SYSTEM);
-		regPermSet.Format("HKEY_LOCAL_MACHINE\\%s\\%s",NTSYSLOG_SOFTWARE_KEY,SYSTEM_SECTION);
+		regPermSet.Format(L"HKEY_LOCAL_MACHINE\\%s\\%s",NTSYSLOG_SOFTWARE_KEY,SYSTEM_SECTION);
 		AddPermissions(regPermSet);
 	} else 
 		RegCloseKey(hRegTest);
 
-	DEBUGSERVICE(Message,"Registry init phase 2 done.");
+	DEBUGSERVICE(4,"Registry init phase 2 done.");
 
 	//Create and fix settings for applicationlogs
 	if (RegCreateKeyEx( hKeySoftware, APPLICATIONLOGS, 0, REG_NONE, REG_OPTION_NON_VOLATILE,KEY_WRITE|KEY_READ|WRITE_DAC, NULL, &hRegTest, &dwValue) == ERROR_SUCCESS){
-		regPermSet.Format("HKEY_LOCAL_MACHINE\\%s\\%s",NTSYSLOG_SOFTWARE_KEY,APPLICATIONLOGS);
+		regPermSet.Format(L"HKEY_LOCAL_MACHINE\\%s\\%s",NTSYSLOG_SOFTWARE_KEY,APPLICATIONLOGS);
 		AddPermissions(regPermSet);
 	} else
 		RegCloseKey(hRegTest);
 
-	DEBUGSERVICE(Message,"Registry init phase 3 done.");
+	DEBUGSERVICE(4,"Registry init phase 3 done.");
 
-	status=AddPermissions("SYSTEM\\CurrentControlSet\\Services\\EventLog");
+	status=AddPermissions(L"SYSTEM\\CurrentControlSet\\Services\\EventLog");
 	if (status) {
-		DEBUGSERVICE(Message,"Failed to write permissions to registry, with error %d",status);
+		DEBUGSERVICE(4,"Failed to write permissions to registry, with error %d",status);
 	}
 
-	status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Services\\EventLog", 0, KEY_READ, &hReg);
+	status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Services\\EventLog", 0, KEY_READ, &hReg);
    	if (status == ERROR_SUCCESS){
 		int 	i = 0;
-		char buffer[256];
+		wchar_t buffer[256];
 
-		while (RegEnumKey(hReg, i++, buffer, sizeof(buffer)) == ERROR_SUCCESS)	{
-			if ((_stricmp(buffer,"System")==0)|(_stricmp(buffer,"Application")==0)|(_stricmp(buffer,"Security")==0))
+		while (RegEnumKey(hReg, i++, buffer, sizeof(wchar_t)*256) == ERROR_SUCCESS)	{
+			if ((wcscmp(buffer,L"System")==0)|(wcscmp(buffer,L"Application")==0)|(wcscmp(buffer,L"Security")==0))
 				continue; //three main already initialized
 	
-			regPermSet.Format("SYSTEM\\CurrentControlSet\\Services\\EventLog\\%s",buffer);
+			regPermSet.Format(L"SYSTEM\\CurrentControlSet\\Services\\EventLog\\%s",buffer);
 			AddPermissions(regPermSet);
 
-			if (RegOpenKeyEx(hKeySoftware,buffer,0,KEY_READ,&hRegTest)!= ERROR_SUCCESS) {
-				initEventLogTypeEntry(hKeySoftware,buffer, FACILITY_SYSTEM);
+			if (RegOpenKeyEx(hKeySoftware, buffer,0,KEY_READ,&hRegTest)!= ERROR_SUCCESS) {
+				initEventLogTypeEntry(hKeySoftware, buffer, FACILITY_SYSTEM);
 			} else
 				RegCloseKey(hRegTest);
 		}
@@ -274,7 +274,7 @@ void __cdecl ReadSettings(int *_syslogaPort, int *_syslogBackupPort, bool *forwa
 	bool tempForwardEvents=true;
 
 	// Connect to the registry on HKLM
-	if (RegConnectRegistry( (char*)((LPCTSTR)""), HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS){
+	if (RegConnectRegistry( L"", HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS){
 		DEBUGSERVICE(Message,"Failed to open HKEY_LOCAL_MACHINE in registry - settings not read");
 		return;
 	}
@@ -333,34 +333,34 @@ void __cdecl ReadSettings(int *_syslogaPort, int *_syslogBackupPort, bool *forwa
 ****************************************************************************/
 void initFilterEventArray( DWORD *A) {
 	CString filterArray;
-	char theList[256];
-	char *Ptr=&(theList[0]);
+	wchar_t theList[256];
+	wchar_t *Ptr=&(theList[0]);
 	DWORD anEventId;
 	int status,counter=0;
 	
 	OpenRegistry(NTSYSLOG_SYSLOG_KEY);
-	ReadRegKey(&filterArray,"",EVENTIDFILTERARRAY);
+	ReadRegKey(&filterArray,L"",EVENTIDFILTERARRAY);
 	CloseRegistry();
 
-	strcpy_s(theList,filterArray.GetBuffer());
+	wcscpy(theList,filterArray.GetString());
 
 	do {
-		status=sscanf_s(Ptr,"%d",&anEventId);
+		status=wscanf(Ptr,L"%d",&anEventId);
 		if (status==-1) {
 			*A=-1;
 			break;
 		}
 		if (status==0) {
 			*A=-1;
-			logger(Error,"EventIDFilterList in registry contained invalid characters. Only numbers, comma and spaces are allowed. Complete filter list possibly not read.");
+			logger(Error,L"EventIDFilterList in registry contained invalid characters. Only numbers, comma and spaces are allowed. Complete filter list possibly not read.");
 			break;
 		}
 		*A=anEventId;
 		A++;
 		counter++;
 
-		Ptr=strstr(Ptr,",");
-		while((Ptr!=NULL)&&((*Ptr==' ')||(*Ptr==','))) //move past ',' and space
+		Ptr=wcsstr(Ptr,L",");
+		while((Ptr!=NULL)&&((*Ptr==L' ')||(*Ptr==L','))) //move past ',' and space
 			Ptr++;
 
 	} while ((Ptr!=NULL)&(counter<MAXEVENTIDFILTERNUMBER));
@@ -374,12 +374,12 @@ void initFilterEventArray( DWORD *A) {
 int __cdecl SyslogHostInRegistryOK() {
 	HKEY		hKeyRemote,hKeySoftware;
 	DWORD		dwSize,dwValue,dwType;
-	TCHAR		szBuffer[256];
+	wchar_t		szBuffer[256];
 	int			status;
 //	char		ownIP[32];
 
 	// Connect to the registry on HKLM
-	if (RegConnectRegistry( (char*)((LPCTSTR)""), HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS){
+	if (RegConnectRegistry( L"", HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS){
 		DEBUGSERVICE(Message,"Failed to open HKEY_LOCAL_MACHINE in registry - settings not read");
 		return 0;
 	}
@@ -393,15 +393,16 @@ int __cdecl SyslogHostInRegistryOK() {
 	}
 
 	// Read the primary syslogd server
-	dwSize = 255*sizeof( TCHAR);
-	memset( szBuffer, 0, 255+sizeof( TCHAR));
+	dwSize = 255*sizeof(wchar_t);
+	memset( szBuffer, 0, 255+sizeof(wchar_t));
 	status=RegQueryValueEx( hKeySoftware, PRIMARY_SYSLOGD_ENTRY, 0, &dwType, (LPBYTE) szBuffer, &dwSize);
 	
-	if ((status!= ERROR_SUCCESS)||(strcmp(szBuffer,"")==0)||(strcmp(szBuffer,"0.0.0.0")==0))	{
-	RegCloseKey (hKeySoftware);
-	RegCloseKey( hKeyRemote);
+	if ((status!= ERROR_SUCCESS)||(wcscmp(szBuffer,L"")==0)||(wcscmp(szBuffer,L"0.0.0.0")==0))	{
+		RegCloseKey (hKeySoftware);
+		RegCloseKey( hKeyRemote);
         return 0;
 	}
+
 	RegCloseKey (hKeySoftware);
 	RegCloseKey( hKeyRemote);
 	return 1;

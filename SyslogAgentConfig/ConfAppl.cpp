@@ -47,10 +47,10 @@ BOOL CConfAppl::OnInitDialog(){
 	} else {
 		SeverityLevel.SetCurSel(6); //Information
 		Facility.SetCurSel(23);
-		ProcessName.SetWindowText("Process Name");
+		ProcessName.SetWindowText(L"Process Name");
 		CheckDlgButton(IDC_RADIO_DIR,1);
 		OnBnClickedRadioDir();
-		m_File_Extension.SetWindowText("log");
+		m_File_Extension.SetWindowText(L"log");
 	}
 
 	//Disable non-valid fields
@@ -189,7 +189,6 @@ void CConfAppl::OnBnClickedOk(){
 		WriteRegKey(&text,APP_FILENAME);
 		WriteRegKey(&text,APP_EXT);
 		WriteRegKey(&text,APP_PATH);
-
 	}
 
 	value=(ParseDate.GetCheck()==BST_CHECKED);
@@ -224,7 +223,7 @@ void CConfAppl::OnBnClickedOk(){
 	WriteRegKey(&value,APP_IGNORE_FIRST_LINES);
 
 	NbrIgnoreLines.GetWindowText(text);
-	intvalue=atoi(text);
+	intvalue=atoi(CT2A(text));
 	WriteRegKey((unsigned int*)&intvalue,APP_NBR_IGNORE_LINES);
 
 	CloseRegistry();
@@ -251,36 +250,36 @@ int CConfAppl::ReadSettings(void){
 	//Load from registry
 	OpenRegistry(NTSYSLOG_SYSLOG_KEY);
 	GoToRegKey(APPLICATIONLOGS);
-	if(m_initString=="") {
-		AfxMessageBox("Error. Trying to read non-existant settings.", MB_ICONSTOP);
+	if(m_initString==L"") {
+		AfxMessageBox(L"Error. Trying to read non-existant settings.", MB_ICONSTOP);
 		return 0;
 	};
-	GoToRegKey(_T(m_initString));
+	GoToRegKey(m_initString);
 
 	//	CheckDlgButton( IDC_AUDIT_FAILURE_CHECK, (m_uCurrentState & CHECK_AUDIT_FAILURE));
 
 	//	m_File_Extension.GetWindowText(text);
-	ReadRegKey(&text,"",APP_EXT);
+	ReadRegKey(&text,L"",APP_EXT);
 	m_File_Extension.SetWindowText(text);
-	ReadRegKey(&text,"",APP_PATH);
+	ReadRegKey(&text,L"",APP_PATH);
 	m_Path.SetWindowText(text);
-	if (text!="") {
+	if (text!=L"") {
 		CheckDlgButton(IDC_RADIO_DIR,1);
 		OnBnClickedRadioDir();
 	}
 
-	ReadRegKey(&text,"",APP_FILENAME);
+	ReadRegKey(&text,L"",APP_FILENAME);
 	m_fileName.SetWindowText(text);
-	if (text!="") {
+	if (text!=L"") {
 		CheckDlgButton(IDC_RADIO_FILE,1);
 		OnBnClickedRadioFile();
 	}
 
-	ReadRegKey(&text,"",APP_ROTATEFILE);
+	ReadRegKey(&text,L"",APP_ROTATEFILE);
 	m_rotate_file.SetWindowText(text);
-	ReadRegKey(&text,"",APP_ROTATEDFILE);
+	ReadRegKey(&text,L"",APP_ROTATEDFILE);
 	m_rotated_file.SetWindowText(text);
-	if (text!="") {
+	if (text!=L"") {
 		CheckDlgButton(IDC_RADIO_ROTATE_FILE,1);
 		OnBnClickedRadioRotateFile();
 	}
@@ -303,7 +302,7 @@ int CConfAppl::ReadSettings(void){
 	ReadRegKey(&boolvalue,false,APP_UNICODE);
 	Unicode.SetCheck(boolvalue);
 
-	ReadRegKey(&text,"Process Name",APP_PROCESS_NAME);
+	ReadRegKey(&text,L"Process Name",APP_PROCESS_NAME);
 	ProcessName.SetWindowText(text);
 
 	ReadRegKey((unsigned int*)&intvalue,22,APP_FACILITY);
@@ -312,14 +311,14 @@ int CConfAppl::ReadSettings(void){
 	ReadRegKey(&boolvalue,false,APP_IGNORE_PREFIX_LINES);
 	ignorePrefixLines.SetCheck(boolvalue);
 
-	ReadRegKey(&text,"",APP_PREFIX);
+	ReadRegKey(&text,L"",APP_PREFIX);
 	prefix.SetWindowText(text);
 
 	ReadRegKey(&boolvalue,false,APP_IGNORE_FIRST_LINES);
 	ignoreFirstLines.SetCheck(boolvalue);
 
 	ReadRegKey((unsigned int*)&intvalue,0,APP_NBR_IGNORE_LINES);
-	text.Format("%d",intvalue);
+	text.Format(L"%d",intvalue);
 	NbrIgnoreLines.SetWindowText(text);
 
 	CloseRegistry();
@@ -337,7 +336,7 @@ void CConfAppl::Browse(CEdit *a){
 	if	(	::SHGetMalloc	(	&pMalloc) ==	NOERROR) 
 	{ 
 		BROWSEINFO		bi;	
-		char			pszBuffer [	MAX_PATH]; 
+		wchar_t			pszBuffer [	MAX_PATH]; 
 		LPITEMIDLIST	pidl; 
 
 		// Get help on BROWSEINFO struct - it's got all the bit settings. 
@@ -428,9 +427,9 @@ void CConfAppl::OnBnClickedRadioDir(){
 	GetDlgItem(IDC_BROWSE)->EnableWindow(true);
 	GetDlgItem(IDC_APP_PATH)->EnableWindow(true);
 	
-	m_rotated_file.SetWindowText("");
-	m_rotate_file.SetWindowText("");
-	m_fileName.SetWindowText("");
+	m_rotated_file.SetWindowText(L"");
+	m_rotate_file.SetWindowText(L"");
+	m_fileName.SetWindowText(L"");
 	
 
 }
@@ -448,16 +447,14 @@ void CConfAppl::OnBnClickedRadioFile(){
 	GetDlgItem(IDC_BROWSE)->EnableWindow(false);
 	GetDlgItem(IDC_APP_PATH)->EnableWindow(false);
 
-	m_rotated_file.SetWindowText("");
-	m_rotate_file.SetWindowText("");
-	m_Path.SetWindowText("");
+	m_rotated_file.SetWindowText(L"");
+	m_rotate_file.SetWindowText(L"");
+	m_Path.SetWindowText(L"");
 	
 }
 
 void CConfAppl::OnBnClickedRadioRotateFile(){
-
-
-
+		
 	m_radio=3;
 
 	GetDlgItem(IDC_APP_ROTATE_FILE1)->EnableWindow(true);
@@ -470,16 +467,16 @@ void CConfAppl::OnBnClickedRadioRotateFile(){
 	GetDlgItem(IDC_BROWSE)->EnableWindow(false);
 	GetDlgItem(IDC_APP_PATH)->EnableWindow(false);
 
-	m_Path.SetWindowText("");
-	m_fileName.SetWindowText("");
+	m_Path.SetWindowText(L"");
+	m_fileName.SetWindowText(L"");
 
 }
 
 
 void CConfAppl::OnBnClickedBrowse2(){
 
-	CFileDialog fileDlg( TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, "All Files (*.*)|*.*|Log Files (*.log)|*.log|||", this);
-	fileDlg.m_ofn.lpstrTitle = "Choose static log file";
+	CFileDialog fileDlg( TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, L"All Files (*.*)|*.*|Log Files (*.log)|*.log|||", this);
+	fileDlg.m_ofn.lpstrTitle = L"Choose static log file";
 
 	if ( fileDlg.DoModal() == IDOK){
 		m_fileName .SetWindowText(fileDlg.GetPathName()); 
@@ -501,8 +498,8 @@ void CConfAppl::OnBnClickedBrowse2(){
 }
 
 void CConfAppl::OnBnClickedBrowseRotate1(){
-	CFileDialog fileDlg( TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, "All Files (*.*)|*.*|Log Files (*.log)|*.log|||", this);
-	fileDlg.m_ofn.lpstrTitle = "Choose current log file";
+	CFileDialog fileDlg( TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, L"All Files (*.*)|*.*|Log Files (*.log)|*.log|||", this);
+	fileDlg.m_ofn.lpstrTitle = L"Choose current log file";
 
 	if ( fileDlg.DoModal() == IDOK){
 		m_rotate_file.SetWindowText(fileDlg.GetPathName()); 
@@ -511,8 +508,8 @@ void CConfAppl::OnBnClickedBrowseRotate1(){
 }
 
 void CConfAppl::OnBnClickedBrowseRotate2(){
-	CFileDialog fileDlg( TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, "All Files (*.*)|*.*|Log Files (*.log)|*.log|||", this);
-	fileDlg.m_ofn.lpstrTitle = "Choose rotated log file name";
+	CFileDialog fileDlg( TRUE, NULL, NULL, OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, L"All Files (*.*)|*.*|Log Files (*.log)|*.log|||", this);
+	fileDlg.m_ofn.lpstrTitle = L"Choose rotated log file name";
 
 	if ( fileDlg.DoModal() == IDOK){
 		m_rotated_file.SetWindowText(fileDlg.GetPathName()); 
@@ -552,7 +549,7 @@ void CConfAppl::OnBnClickedSuggestsettings(){
 	appS.failedToParseDate=appS.failedToParseTime=appS.failedToParseHost=appS.failedToParseProcess=appS.failedToParseSeverity=false;
 
 	if ((m_Path.GetWindowTextLength()==0)&(m_fileName.GetWindowTextLength()==0)&(m_rotate_file.GetWindowTextLength()==0)) {
-		AfxMessageBox("First specify file or directory and file extension!");
+		AfxMessageBox(L"First specify file or directory and file extension!");
 		return;
 	} else {
 		if (AfxMessageBox( _T( "Inspect log file(s) and suggest settings now?"),MB_YESNO|MB_ICONQUESTION) == IDNO) {
@@ -570,29 +567,29 @@ void CConfAppl::OnBnClickedSuggestsettings(){
 
 	fileNameReply=getLatestLogFileName(tempA,tempB,tempC);
 	if (fileNameReply=="") {
-		AfxMessageBox("No file found!");
+		AfxMessageBox(L"No file found!");
 		return;
 	}
 
 	//is file unicode?
-	strncpy(DaFileName,fileNameReply,255);
-	appS.ConfirmedUnicodeFormat=testUnicode(DaFileName);
+	strncpy_s(DaFileName,CT2A(fileNameReply),255);
+	appS.ConfirmedUnicodeFormat=testUnicode(T2W((LPTSTR)DaFileName));
 
 	//open file
 	if (appS.ConfirmedUnicodeFormat) {
-		ThreadData_fp= _wfsopen(T2W(fileNameReply),T2W("rb"), _SH_DENYNO);
+		ThreadData_fp= _wfsopen(CT2W(fileNameReply),L"rb", _SH_DENYNO);
 		if(ThreadData_fp==NULL){
 			CString foo;
-			foo.Format("Failed to open file! Error: %d.",errno);
+			foo.Format(L"Failed to open file! Error: %d.",errno);
 			AfxMessageBox(foo.GetBuffer());
 			return;
 		}
 		ernogetc(ThreadData_fp,true); //Read and ignore the FF FE
 	} else {
-		ThreadData_fp= _fsopen(fileNameReply,"rb", _SH_DENYNO);
+		ThreadData_fp= _fsopen(CT2A(fileNameReply),"rb", _SH_DENYNO);
 		if(ThreadData_fp==NULL){
 			CString foo;
-			foo.Format("Failed to open file! Error: %d.",errno);
+			foo.Format(L"Failed to open file! Error: %d.",errno);
 			AfxMessageBox(foo.GetBuffer());
 			return;
 		}
@@ -614,14 +611,14 @@ void CConfAppl::OnBnClickedSuggestsettings(){
 				appS.ignorePrefixLines=true;
 			}
 	} else {
-		AfxMessageBox("Log file empty!");
+		AfxMessageBox(L"Log file empty!");
 		fclose(ThreadData_fp);
 		return;
 	}
 
 	//Go back to just after last Field descriptor, or start of file
 	if (fseek(ThreadData_fp, 0, SEEK_SET)!= 0) {
-		AfxMessageBox("Failed to set file position.");
+		AfxMessageBox(L"Failed to set file position.");
 		return;
 	}
 	if (appS.ConfirmedUnicodeFormat) {
@@ -640,7 +637,7 @@ void CConfAppl::OnBnClickedSuggestsettings(){
 	}
 	//Go back to just after last Field descriptor, or start of file
 	if (fseek(ThreadData_fp, lastFieldsPos, SEEK_SET)!= 0) {
-		AfxMessageBox("Failed to set file position.");
+		AfxMessageBox(L"Failed to set file position.");
 		return;
 	}
 	if (appS.ConfirmedUnicodeFormat) {
@@ -660,7 +657,7 @@ void CConfAppl::OnBnClickedSuggestsettings(){
 
 	counter=getLine(ThreadData_fp,appS.ConfirmedUnicodeFormat,buf,sizeof(buf)-1);
 	if (counter< 1) {
-		AfxMessageBox("Log file empty after last description of field. Either repeast this\nprocess when entries are available, or specify an older log file with\nthe same settings during the identification period.");
+		AfxMessageBox(L"Log file empty after last description of field. Either repeast this\nprocess when entries are available, or specify an older log file with\nthe same settings during the identification period.");
 		return;
 	}
 	cleanInput((unsigned char*)&(buf[0]),(unsigned char*)&(output[0]),sizeof(buf)-1); //fills output
@@ -734,7 +731,7 @@ void CConfAppl::OnBnClickedSuggestsettings(){
 		CheckDlgButton(IDC_USE_PREFIX,1);
 		prefix.SetWindowText(appS.prefix);
 	} else {
-		prefix.SetWindowText("");
+		prefix.SetWindowText(L"");
 		CheckDlgButton(IDC_USE_PREFIX,BST_UNCHECKED);
 	}
 

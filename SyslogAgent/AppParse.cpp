@@ -109,14 +109,14 @@ char* facilityName(int a) {
 
 /********************************************************
 ********************************************************/
-bool testUnicode(char *filename) {
+bool testUnicode(wchar_t *filename) {
 	char a,b;
 	FILE *test=NULL;
 
 	try {
-		test= _wfsopen(T2W(filename),T2W("rb"), _SH_DENYNO);
+		test= _wfsopen(filename,_T("rb"), _SH_DENYNO);
 		if(test==NULL ){
-			logger(Error,"Failed to open input file %s to inspect unicode status. Error code %d. Assuming non unicode. Problem with log file access?",filename, errno);
+			logger(Error,L"Failed to open input file %s to inspect unicode status. Error code %d. Assuming non unicode. Problem with log file access?",filename, errno);
 			return false;
 		}
 
@@ -138,11 +138,11 @@ bool testUnicode(char *filename) {
 		}
 	}
 	catch(SE_Exception e) {
-		logger(Error,"SEH Exception in testUnicode for log file %s. Assuming non unicode log file. Error code %u.",filename,e.getSeNumber());
+		logger(Error,L"SEH Exception in testUnicode for log file %s. Assuming non unicode log file. Error code %u.",filename,e.getSeNumber());
 	}
 	catch(...) {
 		CreateMiniDump(NULL);
-		logger(Error, "Exception when detecting unicode status on log file %s. Dump file written.",filename);
+		logger(Error, L"Exception when detecting unicode status on log file %s. Dump file written.",filename);
 		if (test!=NULL)
 		fclose(test);
 	}
@@ -262,7 +262,7 @@ CString getLatestLogFileName(CString logPath,CString fileExtension, CString Spec
 		if (singleChar!='.')	{
 			strWildcard += _T(".");
 		}
-		strWildcard	+= _T(fileExtension);
+		strWildcard	+= fileExtension;
 	}
 
 	// start searching for files
@@ -304,9 +304,14 @@ void GetOwnIP() {
 	char aName[256];
 	char *namePtr=&aName[0];
 	getenv_s(&aSize,namePtr,256,"COMPUTERNAME");
-	CString temp=namePtr;
+
+	WCHAR* pwcsName = new WCHAR[256];
+	MultiByteToWideChar(CP_ACP, 0, namePtr, -1, (LPWSTR)pwcsName, 256);
+
+	CString temp;
+	temp.Format(L"%s", pwcsName);
 	temp.MakeLower();
-	strcpy_s(applHostName,temp);
+	strcpy_s(applHostName,CT2A(temp));
 
 	pHost = gethostbyname(applHostName);
 	if((pHost!=NULL)&&(pHost->h_addr_list[0]!=NULL)) {
@@ -315,13 +320,13 @@ void GetOwnIP() {
 		for( j = 0; j < pHost->h_length; j++ ){
 			if( j > 0 )
 				str += ".";
-			addr.Format("%u", (unsigned int)((unsigned char*)pHost->h_addr_list[0])[j]);
+			addr.Format(L"%u", (unsigned int)((unsigned char*)pHost->h_addr_list[0])[j]);
 			str += addr;
 		}
-		strcpy_s(applHostIP,str);  //Set global variable ownIP
+		strcpy_s(applHostIP,CT2A(str));  //Set global variable ownIP
 	} else {
 		strcpy_s(applHostIP,"127.0.0.1");  //What other option do we have..
-		logger(Error,"Failed to obtain Host IP address. Using 127.0.0.1.");
+		logger(Error,L"Failed to obtain Host IP address. Using 127.0.0.1.");
 	}
 
 	WSACleanup();
@@ -507,7 +512,7 @@ void parseFieldCodes(applSettings *SettingsPtr,char *buf) {
 		}
 	}
 	catch (...) {
-		logger(Error,"Exception in Application parsings parseFieldCodes. Application logging of %s cannot continue due to exception. The line being parsed:%s",SettingsPtr->ApplicationName,buf);
+		logger(Error,L"Exception in Application parsings parseFieldCodes. Application logging of %s cannot continue due to exception. The line being parsed:%s",SettingsPtr->ApplicationName,buf);
 		CreateMiniDump(NULL);
 		AfxEndThread(0,true);
 	}
@@ -527,7 +532,7 @@ int parseMessage(unsigned char* input,unsigned char* output,applSettings *logger
 
 	//   facit:           <82>Sep 18 13:57:42 192.168.0.12 SyslogGen This is a test
 
-	CString date,time,host,UserID,facilityString,SeverityString="I",ServerIP,Process,nonMatchingFields,ClientIP,SeverityFullString;
+	CString date,time,host,UserID,facilityString,SeverityString=L"I",ServerIP,Process,nonMatchingFields,ClientIP,SeverityFullString;
 	bool dateFound,timeFound,FoundSeverity,ClientIPFound,FoundServerName,FoundServerIP,FoundUserID,FoundProcess,FoundWin32Severity,hostFound;
 	unsigned char field[32][1024],tempStr[1024];
 	int charsParsed,i,nbrOfFields=0,status,EventId=0;
@@ -599,7 +604,7 @@ int parseMessage(unsigned char* input,unsigned char* output,applSettings *logger
 
 		if ((*startpos)=='#') { //Headerline in file. If so, skip field identification and assignment.
 			i=nbrOfFields;
-			nonMatchingFields.Append((char*)startpos);
+			nonMatchingFields.Append(T2W((LPTSTR)startpos));
 		} else {
 			i=0;
 		}
@@ -667,8 +672,8 @@ int parseMessage(unsigned char* input,unsigned char* output,applSettings *logger
 						facilityAndSeverityValue=loggerInformation->Facility*8+3; //Error
 					}
 					FoundWin32Severity=true;
-					nonMatchingFields.Append((char*)&(field[i][0]));
-					nonMatchingFields.Append(" ");
+					nonMatchingFields.Append(T2W((LPTSTR)&(field[i][0])));
+					nonMatchingFields.Append(L" ");
 					continue;
 				}
 				else if(strcmp("sc-status",(char*)&(loggerInformation->fieldCodes[i][0]))==0) {
@@ -680,8 +685,8 @@ int parseMessage(unsigned char* input,unsigned char* output,applSettings *logger
 							facilityAndSeverityValue=loggerInformation->Facility*8+3; //Error
 						}
 						FoundSeverity=true;
-						nonMatchingFields.Append((char*)&(field[i][0]));
-						nonMatchingFields.Append(" ");
+						nonMatchingFields.Append(T2W((LPTSTR)&(field[i][0])));
+						nonMatchingFields.Append(L" ");
 						continue;
 				}
 			} //end if fieldcodes
@@ -705,8 +710,8 @@ int parseMessage(unsigned char* input,unsigned char* output,applSettings *logger
 			}
 
 			//no match
-			nonMatchingFields.Append((char*)&(field[i][0]));
-			nonMatchingFields.Append(" ");
+			nonMatchingFields.Append(T2W((LPTSTR)&(field[i][0])));
+			nonMatchingFields.Append(L" ");
 		}
 
 		//Should parse, but nothing found
@@ -739,7 +744,7 @@ int parseMessage(unsigned char* input,unsigned char* output,applSettings *logger
 			Process="Unknown";
 		}
 
-		//just stoppat in [info] under, för att få parsern i Syslogservern att förstå mellanslag i processnamnet.... Bättre lösning?
+		//just stoppat in [info] under, för att f?parsern i Syslogservern att först?mellanslag i processnamnet.... Bättre lösning?
 		//sprintf((char*)output,"<%d>%s %s %s %s[%s] %s%s",facilityAndSeverityValue,date.GetBuffer(),time.GetBuffer(),host.GetBuffer(),process.GetBuffer(),SeverityFullString.GetBuffer(),nonMatchingFields.GetBuffer(),(char*)(input+charsParsed));
 		_snprintf_s((char*)output,1024,_TRUNCATE,"<%d>%s %s %s %s[%s] %s",facilityAndSeverityValue,date.GetBuffer(),time.GetBuffer(),host.GetBuffer(),Process.GetBuffer(),SeverityFullString.GetBuffer(),nonMatchingFields.GetBuffer());
 		output[1022]=(char)10; //Force cr if full buffert was filled
@@ -751,14 +756,14 @@ int parseMessage(unsigned char* input,unsigned char* output,applSettings *logger
 		DEBUGAPPLPARSE(Informational,"Appl parse done:[%s]",output);
 	}
 		catch(SE_Exception e) {
-		logger(Informational,"SEH Exception in parsing application log. Error code %u. The line was not inserted. Application logging continues. The line not inserted:%s",e.getSeNumber(),(char*)input);
+		logger(Informational,L"SEH Exception in parsing application log. Error code %u. The line was not inserted. Application logging continues. The line not inserted:%s",e.getSeNumber(),(char*)input);
 		CreateMiniDump(NULL);
 		Sleep(1000);
 		return 0;
 	}
 
 	catch (...) {
-		logger(Informational,"Exception in parsing application log. The line was not inserted. Application logging continues. The line not inserted:%s",(char*)input);
+		logger(Informational,L"Exception in parsing application log. The line was not inserted. Application logging continues. The line not inserted:%s",(char*)input);
 		CreateMiniDump(NULL);
 		Sleep(1000);
 		return 0;

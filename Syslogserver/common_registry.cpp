@@ -5,7 +5,7 @@
 #include "winerror.h"
 #include "assert.h"
 //-----LeakWatcher--------------------
-#include "LeakWatcher.h"
+#include "..\SyslogAgent\leakwatcher.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -48,7 +48,7 @@ int WriteRegKey(CString *value, CString Name){
 	if (hKey==NULL) {
 		return 0;
 	}
-	if (RegSetValueEx( hKey, Name, 0, REG_SZ, (LPBYTE) ((*value).GetString()), (*value).GetLength()) != ERROR_SUCCESS) {
+	if (RegSetValueEx( hKey, Name, 0, REG_SZ, (LPBYTE) ((*value).GetString()), (*value).GetLength()*2) != ERROR_SUCCESS) {
 		return 0;
 	}
 	return 1;
@@ -92,14 +92,14 @@ void ReadRegKey(bool *value, bool DefaultValue, CString Name){
 ********************************************************/
 void ReadRegKey(CString *value, CString DefaultValue, CString Name){
 	DWORD dwSize,dwType=REG_SZ;
-	char temp[256]="";
-	dwSize = sizeof( temp);
+	wchar_t temp[256]=L"";
+	dwSize = sizeof( wchar_t)*256;
 	if (hKey==NULL) {
 		return;
 	}
 
 	if ((RegQueryValueEx( hKey, Name, 0, &dwType, (LPBYTE) &(temp[0]), &dwSize) == ERROR_SUCCESS)) {
-		*value = temp;
+		*value = (LPTSTR)temp;
 	} else {  //key not found
 		*value=DefaultValue;
 	}
@@ -117,13 +117,13 @@ void DeleteKey(CString name) {
 *	GetNextKey - cycle through existing keys
 ********************************************************/
 int GetNextKey(CString *keyName) {
-	char buffer[256];
+	wchar_t buffer[256];
 
 	if (RegEnumKey(hKey, enumerator++, buffer, sizeof(buffer)) == ERROR_SUCCESS) {
 		*keyName=buffer;
 		return 1;
 	}
-	*keyName="";
+	*keyName=L"";
 	return 0;
 }
 
@@ -140,7 +140,7 @@ int GoToRegKey(CString name){
 	csKeyName.Format( _T( "%s\\"),name);
 	i=RegCreateKeyEx( hKey, csKeyName, 0, REG_NONE, REG_OPTION_NON_VOLATILE,KEY_WRITE|KEY_READ|WRITE_DAC, NULL, &hKeyTemp, &dwValue);
 	if (i != ERROR_SUCCESS) {
-		logger(Error,"Failed to go to new sub registry key.");
+		logger(Error,L"Failed to go to new sub registry key.");
 		hKeyTemp=NULL;
 		return -1;
 	}
@@ -170,8 +170,8 @@ int SystemDSNtype() {
 
 
 	m_csComputer.Empty();
-	if (RegConnectRegistry( (char*)((LPCTSTR)m_csComputer), HKEY_LOCAL_MACHINE, &hKeySoftware) != ERROR_SUCCESS) {
-		logger(Error,"Error while connecting to the registry!");
+	if (RegConnectRegistry( ((LPCTSTR)m_csComputer), HKEY_LOCAL_MACHINE, &hKeySoftware) != ERROR_SUCCESS) {
+		logger(Error,L"Error while connecting to the registry!");
 		RegCloseKey(hKeySoftware);
 		return 0;
 	}
@@ -186,28 +186,28 @@ int SystemDSNtype() {
 	}
 
 	//Read driver details
-	if ((RegQueryValueEx( hKeySyslogODBC, "Driver", 0, &dwType, (LPBYTE) &(temp[0]), &dwSize) == ERROR_SUCCESS)) {
+	if ((RegQueryValueEx( hKeySyslogODBC, L"Driver", 0, &dwType, (LPBYTE) &(temp[0]), &dwSize) == ERROR_SUCCESS)) {
 		dbDriver=temp;
 	} else {  //key not found
 		dbDriver="void";
 	}
-	if ((RegQueryValueEx( hKeySyslogODBC, "Database", 0, &dwType, (LPBYTE) &(temp[0]), &dwSize) == ERROR_SUCCESS)) {
+	if ((RegQueryValueEx( hKeySyslogODBC, L"Database", 0, &dwType, (LPBYTE) &(temp[0]), &dwSize) == ERROR_SUCCESS)) {
 		dbName=temp;
 	} else {  //key not found
 		dbName="void";
 	}
 
-	if ((dbName.CompareNoCase("Syslog")!=0)&(strstr(dbDriver,"odbcjt")==NULL)) { //not access, no db specified
+	if ((dbName.CompareNoCase(L"Syslog")!=0)&(strstr(CT2A(dbDriver),"odbcjt")==NULL)) { //not access, no db specified
 		//Wrong in registry. We do not have permission to write...
 		//		logger("Error in configuration. The ODBC connection Syslog does not have database 'Syslog' specified. Syslogserver not allowed to correct error.",Error);
 		//		return 0;
 	}
 
-	if (strstr(dbDriver,"myodbc")) {
+	if (strstr(CT2A(dbDriver),"myodbc")) {
 		type=2;
-	} else if (strstr(dbDriver,"odbcjt")) {  //Access
+	} else if (strstr(CT2A(dbDriver),"odbcjt")) {  //Access
 		type=3;
-	} else if (strstr(dbDriver,"psqlodbc")) {  //Postgres
+	} else if (strstr(CT2A(dbDriver),"psqlodbc")) {  //Postgres
 		type=4;
 	} else {
 		type=1;
@@ -238,7 +238,7 @@ void ReadPathFromRegistry(char *connStr,CString ownPath){
 	}
 
 	ReadRegKey(&DaPath,ownPath,LOGPATH);
-	strcpy_s(apa,DaPath);
+	strcpy_s(apa, CT2A(DaPath));
 	strcpy_s(connStr,256,"driver={Microsoft Access Driver (*.mdb)};Dbq=");
 	connStrpos=&connStr[0]+strlen(connStr);
 	while(apa[pos]!='\0') {
@@ -261,8 +261,8 @@ int OpenRegistry(CString key) {
 
 	enumerator=0;
 
-	if (RegConnectRegistry( "", HKEY_LOCAL_MACHINE, &hKeySoftware) != ERROR_SUCCESS) {
-		logger(Error,"Error while connecting to the registry (HKEY_LOCAL_MACHINE)!");
+	if (RegConnectRegistry( L"", HKEY_LOCAL_MACHINE, &hKeySoftware) != ERROR_SUCCESS) {
+		logger(Error,L"Error while connecting to the registry (HKEY_LOCAL_MACHINE)!");
 		RegCloseKey(hKeySoftware);
 		return 0;
 	}
@@ -272,12 +272,13 @@ int OpenRegistry(CString key) {
 	i=RegCreateKeyEx( hKeySoftware, csKeyName, 0, REG_NONE, REG_OPTION_NON_VOLATILE,KEY_WRITE|KEY_READ, NULL, &hKey, &dwValue);
 
 	if (i != ERROR_SUCCESS) {
-		logger(Error,"Failed to open registry key %s.",csKeyName);
+		logger(Error, L"Failed to open registry key %s.", csKeyName);
 		RegCloseKey(hKeySoftware);
 		hKey=NULL;
 		hKeySoftware=NULL;
 		return 0;
-		}
+	}
+
 	return 1;
 }
 /********************************************************
@@ -302,7 +303,7 @@ writeServiceDescription
 void writeServiceDescription() {
 	HKEY hKeyRemote=NULL,hKey=NULL;
 	long DaCode;
-	if (RegConnectRegistry( "", HKEY_LOCAL_MACHINE, &hKeyRemote) == ERROR_SUCCESS) {
+	if (RegConnectRegistry( L"", HKEY_LOCAL_MACHINE, &hKeyRemote) == ERROR_SUCCESS) {
 		//Open the key to where Windows stores service info
 		if (RegOpenKeyEx( hKeyRemote, SERVICE_REG_PATH, 0, KEY_WRITE, &hKey) == ERROR_SUCCESS)
 			DaCode=RegSetValueEx( hKey, SERVICESTRING, 0, REG_SZ, (LPBYTE)"SyslogServer by Datagram receives and stores syslog entries sent via the network.", (DWORD)81);

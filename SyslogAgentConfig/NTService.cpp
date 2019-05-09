@@ -909,7 +909,7 @@ BOOL CNTScmService::QueryConfig(LPQUERY_SERVICE_CONFIG& lpServiceConfig) const
 	}
 
 	if (!bSuccess)
-		TRACE(_T("Failed in call to QueryServiceConfig in QueryConfig, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to QueryServiceConfig in QueryConfig, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -923,7 +923,7 @@ BOOL CNTScmService::Create(CNTServiceControlManager& Manager, LPCTSTR lpServiceN
 							   dwStartType, dwErrorControl, lpBinaryPathName, lpLoadOrderGroup, 
 							   lpdwTagId, lpDependencies, lpServiceStartName, lpPassword);
 	if (m_hService == NULL)
-		TRACE(_T("Failed in call to CreateService in Create, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to CreateService in Create, GetLastError:%d\n", ::GetLastError());
 
 	return (m_hService != NULL);
 }
@@ -933,7 +933,7 @@ BOOL CNTScmService::Delete() const
 	ASSERT(m_hService != NULL);
 	BOOL bSuccess = ::DeleteService(m_hService);
 	if (!bSuccess)
-		TRACE(_T("Failed in call to DeleteService in Delete, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to DeleteService in Delete, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -944,7 +944,7 @@ BOOL CNTScmService::SetObjectSecurity(SECURITY_INFORMATION dwSecurityInformation
 	ASSERT(m_hService != NULL);
 	BOOL bSuccess = ::SetServiceObjectSecurity(m_hService, dwSecurityInformation, lpSecurityDescriptor);
 	if (!bSuccess)
-		TRACE(_T("Failed in call to SetServiceObjectSecurity in SetObjectSecurity, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to SetServiceObjectSecurity in SetObjectSecurity, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -965,7 +965,7 @@ BOOL CNTScmService::QueryObjectSecurity(SECURITY_INFORMATION dwSecurityInformati
 	}
 
 	if (!bSuccess)
-		TRACE(_T("Failed in call to QueryServiceObjectSecurity in QueryObjectSecurity, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to QueryServiceObjectSecurity in QueryObjectSecurity, GetLastError:%d\n", ::GetLastError());
 
 	return bSuccess;
 }
@@ -992,7 +992,7 @@ BOOL CNTScmService::EnumDependents(DWORD dwServiceState, DWORD dwUserData, ENUM_
 	}
 
 	if (!bSuccess)
-		TRACE(_T("Failed in call to EnumDependentServices in EnumDependents, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to EnumDependentServices in EnumDependents, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -1041,7 +1041,7 @@ BOOL CNTServiceControlManager::Open(LPCTSTR pszMachineName, DWORD dwDesiredAcces
 	m_hSCM = ::OpenSCManager(pszMachineName, SERVICES_ACTIVE_DATABASE, dwDesiredAccess);
 
 	if (m_hSCM == NULL)
-		TRACE(_T("Failed in call to OpenSCManager in Open, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to OpenSCManager in Open, GetLastError:%d\n", ::GetLastError());
 	return (m_hSCM != NULL);
 }
 
@@ -1070,7 +1070,7 @@ BOOL CNTServiceControlManager::QueryLockStatus(LPQUERY_SERVICE_LOCK_STATUS& lpLo
 	}
 
 	if (!bSuccess)
-		TRACE(_T("Failed in call to QueryServiceLockStatus in QueryLockStatus, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to QueryServiceLockStatus in QueryLockStatus, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -1097,7 +1097,7 @@ BOOL CNTServiceControlManager::EnumServices(DWORD dwServiceType, DWORD dwService
 	}
 
 	if (!bSuccess)
-		TRACE(_T("Failed in call to EnumServicesStatus in EnumServices, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to EnumServicesStatus in EnumServices, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -1109,7 +1109,7 @@ BOOL CNTServiceControlManager::OpenService(LPCTSTR lpServiceName, DWORD dwDesire
 	if (hService != NULL)
 		service.Attach(hService);
 	else
-		TRACE(_T("Failed in call to OpenService in OpenService, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to OpenService in OpenService, GetLastError:%d\n", ::GetLastError());
 
 	return (hService != NULL);
 }
@@ -1120,7 +1120,7 @@ BOOL CNTServiceControlManager::Lock()
 
 	m_hLock = LockServiceDatabase(m_hSCM);
 	if (m_hLock == NULL)
-		TRACE(_T("Failed in call to LockServiceDatabase in Lock, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to LockServiceDatabase in Lock, GetLastError:%d\n", ::GetLastError());
 	return (m_hLock != NULL);
 }
 
@@ -1131,7 +1131,7 @@ BOOL CNTServiceControlManager::Unlock()
 	{
 		bSuccess = ::UnlockServiceDatabase(m_hLock);
 		if (!bSuccess)
-			TRACE(_T("Failed in call to UnlockServiceDatabase in Unlock, GetLastError:%d\n"), ::GetLastError());
+			TRACE(L"Failed in call to UnlockServiceDatabase in Unlock, GetLastError:%d\n", ::GetLastError());
 		m_hLock = NULL;
 	}
 
@@ -1180,23 +1180,23 @@ BOOL CNTEventLog::Open(LPCTSTR lpUNCServerName, LPCTSTR lpSourceName)
 	Close();
 	m_hEventLog = ::OpenEventLog(lpUNCServerName, lpSourceName);
 	if (m_hEventLog == NULL)
-		TRACE(_T("Failed in call to OpenEventLog in Open, Server:%s, Source:%s, GetLastError:%d\n"), lpUNCServerName, lpSourceName, ::GetLastError());
+		TRACE(L"Failed in call to OpenEventLog in Open, Server:%s, Source:%s, GetLastError:%d\n", lpUNCServerName, lpSourceName, ::GetLastError());
 	return (m_hEventLog != NULL);
 }
 
 BOOL CNTEventLog::OpenApplication(LPCTSTR lpUNCServerName)
 {
-	return Open(lpUNCServerName, _T("Application"));
+	return Open(lpUNCServerName, L"Application");
 }
 
 BOOL CNTEventLog::OpenSystem(LPCTSTR lpUNCServerName)
 {
-	return Open(lpUNCServerName, _T("System"));
+	return Open(lpUNCServerName, L"System");
 }
 
 BOOL CNTEventLog::OpenSecurity(LPCTSTR lpUNCServerName)
 {
-	return Open(lpUNCServerName, _T("Security"));
+	return Open(lpUNCServerName, L"Security");
 }
 
 BOOL CNTEventLog::OpenBackup(LPCTSTR lpUNCServerName, LPCTSTR lpFileName)
@@ -1204,7 +1204,7 @@ BOOL CNTEventLog::OpenBackup(LPCTSTR lpUNCServerName, LPCTSTR lpFileName)
 	Close();
 	m_hEventLog = ::OpenBackupEventLog(lpUNCServerName, lpFileName);
 	if (m_hEventLog == NULL)
-		TRACE(_T("Failed in call to OpenBackupEventLog, Server:%s, Filename:%s, GetLastError:%d\n"), lpUNCServerName, lpFileName, ::GetLastError());
+		TRACE(L"Failed in call to OpenBackupEventLog, Server:%s, Filename:%s, GetLastError:%d\n", lpUNCServerName, lpFileName, ::GetLastError());
 	return (m_hEventLog != NULL);
 }
 
@@ -1215,7 +1215,7 @@ BOOL CNTEventLog::Close()
 	{
 		bSuccess = ::CloseEventLog(m_hEventLog);
 		if (!bSuccess)
-			TRACE(_T("Failed in call to CloseEventLog in Close, GetLastError:%d\n"), ::GetLastError());
+			TRACE(L"Failed in call to CloseEventLog in Close, GetLastError:%d\n", ::GetLastError());
 		m_hEventLog = NULL;
 	}
 
@@ -1227,7 +1227,7 @@ BOOL CNTEventLog::Backup(LPCTSTR lpBackupFileName) const
 	ASSERT(m_hEventLog != NULL);
 	BOOL bSuccess = ::BackupEventLog(m_hEventLog, lpBackupFileName);
 	if (!bSuccess)
-		TRACE(_T("Failed in call to BackupEventLog in Backup, Filename:%s, GetLastError:%d\n"), lpBackupFileName, ::GetLastError());
+		TRACE(L"Failed in call to BackupEventLog in Backup, Filename:%s, GetLastError:%d\n", lpBackupFileName, ::GetLastError());
 	return bSuccess;
 }
 
@@ -1236,7 +1236,7 @@ BOOL CNTEventLog::Clear(LPCTSTR lpBackupFileName) const
 	ASSERT(m_hEventLog != NULL);
 	BOOL bSuccess = ::ClearEventLog(m_hEventLog, lpBackupFileName);
 	if (!bSuccess)
-		TRACE(_T("Failed in call to ClearEventLog in Clear, Filename:%s, GetLastError:%d\n"), lpBackupFileName, ::GetLastError());
+		TRACE(L"Failed in call to ClearEventLog in Clear, Filename:%s, GetLastError:%d\n", lpBackupFileName, ::GetLastError());
 	return bSuccess;
 }
 
@@ -1245,7 +1245,7 @@ BOOL CNTEventLog::GetNumberOfRecords(DWORD& dwNumberOfRecords) const
 	ASSERT(m_hEventLog != NULL);
 	BOOL bSuccess = ::GetNumberOfEventLogRecords(m_hEventLog, &dwNumberOfRecords);
 	if (!bSuccess)
-		TRACE(_T("Failed in call to GetNumberOfEventLogRecords in GetNumberOfRecords, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to GetNumberOfEventLogRecords in GetNumberOfRecords, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -1254,7 +1254,7 @@ BOOL CNTEventLog::GetOldestRecord(DWORD& dwOldestRecord) const
 	ASSERT(m_hEventLog != NULL);
 	BOOL bSuccess = ::GetOldestEventLogRecord(m_hEventLog, &dwOldestRecord);
 	if (!bSuccess)
-		TRACE(_T("Failed in call to GetOldestEventLogRecord in GetOldestRecord, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to GetOldestEventLogRecord in GetOldestRecord, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -1263,7 +1263,7 @@ BOOL CNTEventLog::NotifyChange(HANDLE hEvent) const
 	ASSERT(m_hEventLog != NULL);
 	BOOL bSuccess = ::NotifyChangeEventLog(m_hEventLog, hEvent);
 	if (!bSuccess)
-		TRACE(_T("Failed in call to NotifyChangeEventLog in NotifyChange, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to NotifyChangeEventLog in NotifyChange, GetLastError:%d\n", ::GetLastError());
 	return bSuccess;
 }
 
@@ -1287,7 +1287,7 @@ BOOL CNTEventLog::ReadNext(CEventLogRecord& record, LPCTSTR lpstrLogType) const
 		delete [] lpBuffer;
 	}
 	else
-		TRACE(_T("Failed in call to ReadEventLog in ReadNext, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to ReadEventLog in ReadNext, GetLastError:%d\n", ::GetLastError());
 
 	return bSuccess;
 }
@@ -1312,7 +1312,7 @@ BOOL CNTEventLog::ReadPrev(CEventLogRecord& record, LPCTSTR lpstrLogType) const
 		delete [] lpBuffer;
 	}
 	else
-		TRACE(_T("Failed in call to ReadEventLog in ReadPrev, GetLastError:%d\n"), ::GetLastError());
+		TRACE(L"Failed in call to ReadEventLog in ReadPrev, GetLastError:%d\n", ::GetLastError());
 
 	return bSuccess;
 }
@@ -1356,7 +1356,7 @@ CEventLogRecord::CEventLogRecord(const EVENTLOGRECORD* pRecord, LPCTSTR lpstrLog
 
 	// Map the User SID to the User Name
 	if (!GetEventUserName( pRecord, m_sUserID))
-		m_sUserID = _T( "N/A");
+		m_sUserID = L"N/A";
 	// Copy over the Binary data
 	DWORD i = 0;
 	BYTE* pBeginRecord = (BYTE*) pRecord;
@@ -1452,7 +1452,7 @@ BOOL CEventLogRecord::GetEventUserName(const EVENTLOGRECORD *pelr, CString &csUs
          &cbDomain, &snu))
     {
         // Set the user and domain
-		csUser.Format( _T( "%s\\%s"), szDomain, szName);
+		csUser.Format( L"%s\\%s", szDomain, szName);
     }
     else
     {
@@ -1479,7 +1479,7 @@ BOOL CEventLogRecord::GetEventMessage(const EVENTLOGRECORD *pRecord)
 	// Check paramaters
 	if (pRecord == NULL)
 	{
-		m_sMessage = _T( "N/A (Empty record)");
+		m_sMessage = L"N/A (Empty record)";
 		return FALSE;
 	}
 
@@ -1487,13 +1487,12 @@ BOOL CEventLogRecord::GetEventMessage(const EVENTLOGRECORD *pRecord)
 		szStringArray[i] = LPCTSTR( m_Strings.GetAt( i));
 
 	// Build registry path to obtain which Dll to load for retreiving message
-	StringCchPrintfA( szBuffer,2048, _T( "SYSTEM\\CurrentControlSet\\Services\\EventLog\\%s\\%s"), m_sLogType,
-					 m_sSourceName);
+	wsprintf( szBuffer, L"SYSTEM\\CurrentControlSet\\Services\\EventLog\\%s\\%s", m_sLogType, m_sSourceName);
 
 	// Load message text
 	if (RegOpenKey( HKEY_LOCAL_MACHINE, szBuffer, &hKey) == ERROR_SUCCESS)
 	{
-		if (RegQueryValueEx( hKey, "EventMessageFile", 0, &dwRegType, 
+		if (RegQueryValueEx( hKey, L"EventMessageFile", 0, &dwRegType, 
 				(unsigned char*)szBuffer, &uBufferSize) == ERROR_SUCCESS)
 		{
 			if (ExpandEnvironmentStrings( szBuffer, szDll, 2048) > 0)
@@ -1502,10 +1501,7 @@ BOOL CEventLogRecord::GetEventMessage(const EVENTLOGRECORD *pRecord)
 				{
 					LPVOID pMsg  = NULL;
 					
-					lLength = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-						 					FORMAT_MESSAGE_FROM_HMODULE |
-											FORMAT_MESSAGE_ARGUMENT_ARRAY, hLib, m_dwEventID, 
-											0, (LPTSTR) &pMsg, 128, (LPTSTR *) szStringArray);
+					lLength = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_ARGUMENT_ARRAY, hLib, m_dwEventID, 0, (LPTSTR)&pMsg, 128, (va_list*)szStringArray);
 	
 					if (lLength > 0)
 					{
@@ -1586,21 +1582,21 @@ BOOL CNTEventLogSource::Report(WORD wType, WORD wCategory, DWORD dwEventID, PSID
 
 	// First get the user name
 	DWORD dwUserNameSize = UNLEN + 1;
-	TCHAR szUserName[UNLEN + 1];
+	wchar_t szUserName[UNLEN + 1];
 	::GetUserName(szUserName, &dwUserNameSize);
 
 	DWORD dwDomainNameSize = UNLEN + 1;
-	TCHAR szDomainName[UNLEN + 1];
+	wchar_t szDomainName[UNLEN + 1];
 
 	SID_NAME_USE accountType; 
 	DWORD dwSidSize = 0;
 
 	PSID lpSid = lpUserSid;
-	BYTE* lpBuffer = NULL;
+	wchar_t* lpBuffer = NULL;
 	if (::LookupAccountName(NULL, szUserName, NULL, &dwSidSize, szDomainName, 
 						  &dwDomainNameSize, &accountType) == FALSE) 
 	{
-		lpBuffer = new BYTE[dwSidSize];
+		lpBuffer = new wchar_t[dwSidSize];
 		if (::LookupAccountName(NULL, szUserName, lpBuffer, &dwSidSize, szDomainName, 
 								&dwDomainNameSize, &accountType)) 
 		lpSid = lpBuffer;
@@ -1666,17 +1662,14 @@ BOOL CNTEventLogSource::Install(LPCTSTR lpSourceName, LPCTSTR lpEventMessageFile
 	// Make the necessary updates to the registry
 	BOOL bSuccess = FALSE;
 	HKEY hAppKey;
-	if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\"), 0, 
-						 KEY_WRITE|KEY_READ, &hAppKey) == ERROR_SUCCESS)
+	if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\"), 0, KEY_WRITE|KEY_READ, &hAppKey) == ERROR_SUCCESS)
 	{
 		DWORD dw;
 		HKEY hSourceKey;
-		if (RegCreateKeyEx(hAppKey, lpSourceName, 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE|KEY_READ, NULL,
-							 &hSourceKey, &dw) == ERROR_SUCCESS)
+		if (RegCreateKeyEx(hAppKey, lpSourceName, 0, REG_NONE, REG_OPTION_NON_VOLATILE, KEY_WRITE|KEY_READ, NULL, &hSourceKey, &dw) == ERROR_SUCCESS)
 		{
 			// Write the Message file string
-			bSuccess = (RegSetValueEx(hSourceKey, _T("EventMessageFile"), NULL, REG_SZ, (LPBYTE)lpEventMessageFile, 
-									(lstrlen(lpEventMessageFile)+1)*sizeof(TCHAR)) == ERROR_SUCCESS);
+			bSuccess = (RegSetValueEx(hSourceKey, _T("EventMessageFile"), NULL, REG_SZ, (LPBYTE)lpEventMessageFile, (wcslen(lpEventMessageFile)+1)*sizeof(TCHAR)) == ERROR_SUCCESS);
 			if (!bSuccess)
 			TRACE(_T("Failed in call to RegSetValueEx in Install, GetLastError:%d\n"), ::GetLastError());
 
@@ -1777,8 +1770,7 @@ BOOL CNTEventLogSource::GetStringArrayFromRegistry(HKEY hKey, const CString& sEn
 
 	DWORD dwDataType;
 	DWORD dwDataSize = dwLongestValueDataLength;
-	dwError = ::RegQueryValueEx(hKey, (LPTSTR) (LPCTSTR) sEntry,
-							  NULL, &dwDataType, lpBuffer, &dwDataSize);
+	dwError = ::RegQueryValueEx(hKey, sEntry, NULL, &dwDataType, lpBuffer, &dwDataSize);
 
 
 	if ((dwError != ERROR_SUCCESS) || (dwDataType != REG_MULTI_SZ))

@@ -13,11 +13,23 @@
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
-#ifndef _WIN32_WINNT		// Allow use of features specific to Windows NT 4 or later.
-#define _WIN32_WINNT 0x0400		// Change this to the appropriate value to target Windows 98 and Windows 2000 or later.
-#endif						
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x601
+#endif
 
-
+#define _WIN32_WINNT_NT4                    0x0400 // Windows NT 4.0
+#define _WIN32_WINNT_WIN2K                  0x0500 // Windows 2000
+#define _WIN32_WINNT_WINXP                  0x0501 // Windows XP
+#define _WIN32_WINNT_WS03                   0x0502 // Windows Server 2003
+#define _WIN32_WINNT_WIN6                   0x0600 // Windows Vista
+#define _WIN32_WINNT_VISTA                  0x0600 // Windows Vista
+#define _WIN32_WINNT_WS08                   0x0600 // Windows Server 2008
+#define _WIN32_WINNT_LONGHORN               0x0600 // Windows Vista
+#define _WIN32_WINNT_WIN7                   0x0601 // Windows 7
+#define _WIN32_WINNT_WIN8                   0x0602 // Windows 8
+#define _WIN32_WINNT_WINBLUE                0x0603 // Windows 8.1
+#define _WIN32_WINNT_WINTHRESHOLD           0x0A00 // Windows 10
+#define _WIN32_WINNT_WIN10                  0x0A00 // Windows 10
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
@@ -49,9 +61,8 @@
 #include <tlhelp32.h>
 #include <eh.h>
 
-
-#import ".\msado27.tlb" no_namespace rename( "EOF", "adoEOF" )
-#import ".\MSJRO.DLL" no_namespace
+#import "msado27.tlb" no_namespace rename( "EOF", "adoEOF" )
+//kki #import ".\MSJRO.DLL" no_namespace
 
 
 //{{AFX_INSERT_LOCATION}}

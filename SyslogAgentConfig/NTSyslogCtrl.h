@@ -1,15 +1,11 @@
-// NTSyslogCtrl.h : main header file for the NTSYSLOGCTRL application
+
+// NTSyslogCtrl.h : main header file for the PROJECT_NAME application
 //
 
-#if !defined(AFX_NTSYSLOGCTRL_H__9FB33EE5_E0E8_11D5_B306_0040055338AF__INCLUDED_)
-#define AFX_NTSYSLOGCTRL_H__9FB33EE5_E0E8_11D5_B306_0040055338AF__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #ifndef __AFXWIN_H__
-	#error include 'stdafx.h' before including this file for PCH
+	#error "include 'stdafx.h' before including this file for PCH"
 #endif
 
 #include "resource.h"		// main symbols
@@ -28,16 +24,10 @@
 
 #define DEFAULT_PRIORITY		9
 
-//erno Many defines in registrySettings.h!
-
-
-//void __cdecl initRegistry(char * SyslogAddress);
 extern "C" {
 	void __cdecl initRegistry(char * SyslogAddress);
 }
 
-
-/////////////////////////////////////////////////////////////////////////////
 // CNTSyslogCtrlApp:
 // See NTSyslogCtrl.cpp for the implementation of this class
 //
@@ -48,25 +38,12 @@ public:
 	CNTSyslogCtrlApp();
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CNTSyslogCtrlApp)
-	public:
+public:
 	virtual BOOL InitInstance();
-	//}}AFX_VIRTUAL
 
 // Implementation
 
-	//{{AFX_MSG(CNTSyslogCtrlApp)
-		// NOTE - the ClassWizard will add and remove member functions here.
-		//    DO NOT EDIT what you see in these blocks of generated code !
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_NTSYSLOGCTRL_H__9FB33EE5_E0E8_11D5_B306_0040055338AF__INCLUDED_)
+extern CNTSyslogCtrlApp theApp;

@@ -4,7 +4,7 @@
 #include "winerror.h"
 #include "assert.h"
 //-----LeakWatcher--------------------
-#include "LeakWatcher.h"
+#include "..\SyslogAgent\leakwatcher.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -47,7 +47,7 @@ int GetRegKeySecurity ( CString szRegKey){
  }
 
  // get length of security descriptor
- if ( ( lError = RegQueryInfoKey ( hRegKey, szClassName, &dwcClassLen, 
+ if ( ( lError = RegQueryInfoKey ( hRegKey, (LPWSTR)szClassName, &dwcClassLen, 
       NULL, &dwcSubKeys, &dwcMaxSubKey, &dwcMaxClass, 
       &dwcValues, &dwcMaxValueName, &dwcMaxValueData, 
            &dwcSDLength, &ftLastWriteTime) ) )
@@ -97,7 +97,7 @@ DWORD AddToRegKeySD ( PSECURITY_DESCRIPTOR pRelSD, PSID pGroupSID,
 {
  PSECURITY_DESCRIPTOR pAbsSD = NULL;
 
- PACL  pDACL;
+ PACL  pDACL = NULL;
 
  DWORD  dwSDLength = 0;
  DWORD  dwSDRevision;
@@ -167,15 +167,16 @@ DWORD AddToRegKeySD ( PSECURITY_DESCRIPTOR pRelSD, PSID pGroupSID,
         sizeof ( DWORD) + GetLengthSid ( pGroupSID);
 
  // get memory needed for new DACL
- if ( ! ( pNewDACL = ( PACL) malloc ( dwDACLLength + dwAddDACLLength) ) )
+ pNewDACL = (PACL)malloc(dwDACLLength + dwAddDACLLength);
+ if ( !pNewDACL)
   return ( GetLastError());
 
  // get the sd length
  dwSDLength = GetSecurityDescriptorLength ( pRelSD);
 
  // get memory for new SD
- if ( ! ( pAbsSD = ( PSECURITY_DESCRIPTOR) 
-       malloc ( dwSDLength + dwAddDACLLength) ) )
+ pAbsSD = (PSECURITY_DESCRIPTOR)malloc(dwSDLength + dwAddDACLLength);
+ if ( !pAbsSD )
  {
   dwError = GetLastError();
 

@@ -37,6 +37,8 @@ CConfigLogging::CConfigLogging(CWnd* pParent /*=NULL*/)
 	m_uAuditSuccessPriority = DEFAULT_PRIORITY;
 	m_uAuditFailurePriority = DEFAULT_PRIORITY;
 
+	m_idTitle = L"";
+	m_idRegpath = L"";
 }
 
 
@@ -72,9 +74,10 @@ BOOL CConfigLogging::OnInitDialog()
 
 	// Check to see we were set up properly...
 	//--OLD--if(m_idTitle == NULL || m_idRegpath == NULL)
-	if(m_idTitle.IsEmpty() || m_idRegpath.IsEmpty() ) //NEW
+	
+	if(m_idTitle == L"" || m_idRegpath == L"" ) //NEW
 	{
-			AfxMessageBox("Program error: Dialog incorrectly set up.  This "
+			AfxMessageBox(L"Program error: Dialog incorrectly set up.  This "
 					"message should never appear.", MB_ICONSTOP);
 			CDialog::OnCancel();
 			return TRUE;
@@ -92,7 +95,7 @@ BOOL CConfigLogging::OnInitDialog()
 	CString csUpdate;
 
 	GetWindowText(csFmt);
-	csUpdate.Format(csFmt, (LPCSTR)csTitle);
+	csUpdate.Format(csFmt, csTitle);
 	SetWindowText(csUpdate);
 
 	CWnd *pLabel = GetDlgItem(IDC_LABEL);
@@ -116,7 +119,7 @@ BOOL CConfigLogging::OnInitDialog()
 	// Open the registry on HKLM
 	//Not sure if this is necessary anymore because registry connection
 	//is verified upon selecting the server in the select server dialog
-	if (RegConnectRegistry( (char*)((LPCTSTR)m_csComputer), HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS)
+	if (RegConnectRegistry( ((LPCTSTR)m_csComputer), HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS)
 	{
 		csKeyName.Format( _T( "Error while connecting to the registry!\n\nEnsure that\n\n%s\n%s"),
 						  _T( "1) Network Registry access is enabled if this is a remote computer."),
@@ -281,7 +284,7 @@ void CConfigLogging::OnOK()
 	CString csRegPath = m_idRegpath;
 
 	// Connect to the registry on HKLM
-	if (RegConnectRegistry( (char*)((LPCTSTR)m_csComputer), HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS)
+	if (RegConnectRegistry( ((LPCTSTR)m_csComputer), HKEY_LOCAL_MACHINE, &hKeyRemote) != ERROR_SUCCESS)
 	{
 		AfxMessageBox( _T( "Error while connecting to the registry !\n\nPlease retry."), MB_ICONSTOP);
 		return;
@@ -524,7 +527,7 @@ UINT CConfigLogging::PriorityFromDialog(int facilityId, int severityId)
 	// If one didn't exist, stop rather than crashing.  Should never happen.
 	if(pFacilityWnd == NULL || pSeverityWnd == NULL)
 	{
-		AfxMessageBox("Program error: Dialog now missing controls.  This "
+		AfxMessageBox(L"Program error: Dialog now missing controls.  This "
 				"message should never appear.", MB_ICONSTOP);
 		CDialog::OnCancel();
 	}
@@ -536,7 +539,7 @@ UINT CConfigLogging::PriorityFromDialog(int facilityId, int severityId)
 	// Again, make sure we got values back.
 	if(facility == CB_ERR || severity == CB_ERR)
 	{
-		AfxMessageBox("Program error: Dialog now returns errors.  This "
+		AfxMessageBox(L"Program error: Dialog now returns errors.  This "
 				"message should never appear.", MB_ICONSTOP);
 		CDialog::OnCancel();
 	}
@@ -554,7 +557,7 @@ void CConfigLogging::SetDialogFromPriority(int facilityId, int severityId, UINT 
 	// If one didn't exist, stop rather than crashing.  Should never happen.
 	if(pFacilityWnd == NULL || pSeverityWnd == NULL)
 	{
-		AfxMessageBox("Program error: Dialog missing controls.  This "
+		AfxMessageBox(L"Program error: Dialog missing controls.  This "
 				"message should never appear.", MB_ICONSTOP);
 		CDialog::OnCancel();
 	}
@@ -568,7 +571,7 @@ void CConfigLogging::SetDialogFromPriority(int facilityId, int severityId, UINT 
 	if(pFacilityWnd->SetCurSel(facility) == CB_ERR
 			|| pSeverityWnd->SetCurSel(severity) == CB_ERR)
 	{
-		AfxMessageBox("Program error: Cannot set severity or priority.\n\nCheck "
+		AfxMessageBox(L"Program error: Cannot set severity or priority.\n\nCheck "
 				"registry to make sure it contains valid values..", MB_ICONSTOP);
 		CDialog::OnCancel();
 	}

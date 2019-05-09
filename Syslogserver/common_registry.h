@@ -20,50 +20,52 @@ void writeServiceDescription();
 
 
 //required to exist in project calling this file
-void logger(int severity,char *text,...);
+void logger(int severity,wchar_t *text,...);
 
 
 //---Registry -----
 
-#define NTSYSLOG_SERVICE_NAME	"Syslog Agent"
-#define NTSYSLOG_DISPLAY_NAME	"Syslog Agent"
+#define NTSYSLOG_SERVICE_NAME	L"SyslogAgent"
+#define NTSYSLOG_DISPLAY_NAME	L"SyslogAgent"
 
-#define EVENTIDFILTERARRAY				"EventIDFilterList"
+#define EVENTIDFILTERARRAY				L"EventIDFilterList"
 
-#define NTSYSLOG_SOFTWARE_KEY	 "SOFTWARE\\Datagram\\SyslogAgent"
-#define NTSYSLOG_SYSLOG_KEY		 "SyslogAgent"
-#define APPLICATIONLOGS			 "ApplicationLogs"
-#define APPLICATION_SECTION		 "Application"
-#define SECURITY_SECTION		 "Security"
-#define SYSTEM_SECTION			 "System"
+#define NTSYSLOG_SOFTWARE_KEY	 L"SOFTWARE\\Datagram\\SyslogAgent"
+#define NTSYSLOG_SYSLOG_KEY		 L"SyslogAgent"
+#define APPLICATIONLOGS			 L"ApplicationLogs"
+#define APPLICATION_SECTION		 L"Application"
+#define SECURITY_SECTION		 L"Security"
+#define SYSTEM_SECTION			 L"System"
 
 #define EVENTLOG_REG_PATH		_T( "System\\CurrentControlSet\\Services\\EventLog")
 
 
-#define PRIMARY_SYSLOGD_ENTRY	 "Syslog"
-#define BACKUP_SYSLOGD_ENTRY	 "Syslog1"
+#define PRIMARY_SYSLOGD_ENTRY	 L"Syslog"
+#define BACKUP_SYSLOGD_ENTRY	 L"Syslog1"
 
-#define FORWARDEVENTLOGS		 "ForwardEventLogs"
-#define FORWARDAPPLICATIONLOGS	 "ForwardApplicationLogs"
-#define FORWARDTOMIRROR			 "ForwardToMirror"
+#define FORWARDEVENTLOGS		 L"ForwardEventLogs"
+#define FORWARDAPPLICATIONLOGS	 L"ForwardApplicationLogs"
+#define FORWARDTOMIRROR			 L"ForwardToMirror"
 
-#define USE_PING_ENTRY			 "UsePingBeforeSend"
-#define TCP_DELIVERY			 "TCPDelivery"
-#define PORT_ENTRY				 "SendToPort"
-#define PORT_BACKUP_ENTRY		 "SendToBackupPort"
-#define EVENTLOG_POLL_INTERVAL	 "EventLogPollInterval"
-#define DATAGRAM_KEY			 "SOFTWARE\\Datagram"
+#define USE_PING_ENTRY			 L"UsePingBeforeSend"
+#define TCP_DELIVERY			 L"TCPDelivery"
+#define PORT_ENTRY				 L"SendToPort"
+#define PORT_BACKUP_ENTRY		 L"SendToBackupPort"
+#define EVENTLOG_POLL_INTERVAL	 L"EventLogPollInterval"
+#define DATAGRAM_KEY			 L"SOFTWARE\\Datagram"
 
-#define INFORMATION_ENTRY		 "Information"
-#define INFORMATION_PRIORITY	 "Information Priority" 
-#define WARNING_ENTRY			 "Warning" 
-#define WARNING_PRIORITY		 "Warning Priority" 
-#define ERROR_ENTRY				 "Error"
-#define ERROR_PRIORITY			 "Error Priority" 
-#define AUDIT_SUCCESS_ENTRY		 "Audit Success"
-#define AUDIT_SUCCESS_PRIORITY	 "Audit Success Priority" 
-#define AUDIT_FAILURE_ENTRY		 "Audit Failure"
-#define AUDIT_FAILURE_PRIORITY	 "Audit Failure Priority" 
+#define INFORMATION_ENTRY		 L"Information"
+#define INFORMATION_PRIORITY	 L"Information Priority" 
+#define WARNING_ENTRY			 L"Warning" 
+#define WARNING_PRIORITY		 L"Warning Priority" 
+#define ERROR_ENTRY				 L"Error"
+#define ERROR_PRIORITY			 L"Error Priority" 
+#define AUDIT_SUCCESS_ENTRY		 L"Audit Success"
+#define AUDIT_SUCCESS_PRIORITY	 L"Audit Success Priority" 
+#define AUDIT_FAILURE_ENTRY		 L"Audit Failure"
+#define AUDIT_FAILURE_PRIORITY	 L"Audit Failure Priority" 
+#define SUCCESS_ENTRY			 L"Success"
+#define SUCCESS_PRIORITY		 L"Success Priority"
 
 //erno
 #define SEVERITY_INFORMATION	6
@@ -123,7 +125,7 @@ void logger(int severity,char *text,...);
 #define APP_PREFIX				_T( "Prefix" )
 #define APP_IGNORE_FIRST_LINES  _T( "IgnoreFirstLines" )
 #define APP_NBR_IGNORE_LINES	_T( "NbrIgnoreLines" )
-
+#define APP_UNICODE				_T( "Unicode" )
 
 typedef struct {
 	CString DestionationHost;
@@ -150,13 +152,14 @@ typedef struct {
 	CString prefix;
 	bool ignoreFirstLines;
 	int NbrIgnoreLines;
-	char fieldCodes[32][16];  //32 fields á 16 chars
+	char fieldCodes[32][16];  //32 fields ?16 chars
 	bool fieldCodeProcessIsPresent;
 	bool failedToParseDate;
 	bool failedToParseTime;
 	bool failedToParseHost;
 	bool failedToParseProcess;
 	bool failedToParseSeverity;
+	bool ConfirmedUnicodeFormat;
 } applSettings;
 
 //RFC3164 messages

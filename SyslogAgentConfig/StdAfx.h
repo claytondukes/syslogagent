@@ -1,56 +1,46 @@
+
 // stdafx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
-//
+// or project specific include files that are used frequently,
+// but are changed infrequently
 
-
-
-
-
-
-
-
-
-//                   NOT  USED !!!!!
-
-
-
-
-
-
-
-
-
-#if !defined(AFX_STDAFX_H__9FB33EE9_E0E8_11D5_B306_0040055338AF__INCLUDED_)
-#define AFX_STDAFX_H__9FB33EE9_E0E8_11D5_B306_0040055338AF__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
-#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#ifndef VC_EXTRALEAN
+#define VC_EXTRALEAN            // Exclude rarely-used stuff from Windows headers
+#endif
+
+#include "targetver.h"
+
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS      // some CString constructors will be explicit
+
+// turns off MFC's hiding of some common and often safely ignored warning messages
+#define _AFX_ALL_WARNINGS
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
-//#include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
-#include <afxmt.h>
+
+
+#include <afxdisp.h>        // MFC Automation classes
+
+
+
+#ifndef _AFX_NO_OLE_SUPPORT
+#include <afxdtctl.h>           // MFC support for Internet Explorer 4 Common Controls
+#endif
 #ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>			// MFC support for Windows Common Controls
+#include <afxcmn.h>             // MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
-// Microsoft's STL dosen't compile clean at high warning levels,
-// under VC6.  This lets it be sloppy, but keeps our code at the higher
-// warning level.
-//#pragma warning(push, 3)
-//#include <iostream>
-//#pragma warning(pop)
-// Reference additional headers your program requires here
+#include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
-// For implementing NT Services
-#include <winsvc.h>
-#include <lmcons.h>
+#ifdef _UNICODE
+#if defined _M_IX86
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_X64
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
+#endif
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_STDAFX_H__9FB33EE9_E0E8_11D5_B306_0040055338AF__INCLUDED_)

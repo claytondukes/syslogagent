@@ -169,13 +169,8 @@ extern MyMemstruct reg;
 //void logger(char *text, int severity);
 //void logger(CString, int severity);
 
-void logger(int severity,char *text,...);
-void logToLogFile(char *text,int severity);
-void logToSyslog(char *text,int severity);
-void misc_init();
-void misc_port_init(int Port,int PortTCP);
-void* createDatabaseInstance(CString dbUser, CString dbPass);
-void cleanStr(unsigned char *dest,unsigned char *orig);  //used to clear licenseString from manipulation, and more
+void logger(int severity,wchar_t *text,...);
+
 extern CString LogFilePathName;
 extern CString ownIP;
 extern CString hostname;
